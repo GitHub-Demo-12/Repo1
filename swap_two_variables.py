@@ -11,8 +11,6 @@ y = 10
 temp = x
 x = y
 y = temp
-dnbcnbdsc
 print('The value of x after swapping: {}'.format(x))
-print('The value of y after swapping: {}'.forma
-
+print('The value of y after swapping: {}'.format(y))
 
