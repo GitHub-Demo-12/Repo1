@@ -8,22 +8,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-
     - name: Check out code
       uses: actions/checkout@v2
 
     - name: Run your workflow or commands
       run: |
         # Replace this with the commands you want to execute.
-        mkdir -p output
-        echo "This is your workflow output" > output/results.txt
+        mkdir -p $GITHUB_WORKSPACE/output
+        echo "This is your workflow output" > $GITHUB_WORKSPACE/output/results.txt
 
     - name: Upload results to artifacts
       uses: actions/upload-artifact@v2
       with:
         name: results
-        path: output
+        path: $GITHUB_WORKSPACE/output
