@@ -14,7 +14,7 @@ jobs:
     - name: Run your workflow or commands
       run: |
         # Replace this with the commands you want to execute.
-        echo "This is your workflow output" > output/results.txt
+        echo "This is your workflow output" > results.txt
 
     - name: Move results to output folder
       run: |
