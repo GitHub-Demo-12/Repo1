@@ -18,9 +18,6 @@ jobs:
 
     - name: Attach results to pull request
       run: |
-        # Install and configure GitHub CLI (gh)
-        brew install gh
-
         # Create a temporary branch to commit the results
         git checkout -b temp-branch
         git add results.txt
@@ -28,7 +25,12 @@ jobs:
         git push origin temp-branch
 
         # Create a pull request
-        gh pr create --base main --head temp-branch --title "Results" --body "Here are the results of the workflow:" --reviewer Charan-SV
+        PR_URL=$(curl -s -X POST \
+          -H "Authorization: token ${{ secrets.TOKEN }}" \
+          -d "{\"title\":\"Results\",\"base\":\"main\",\"head\":\"temp-branch\",\"body\":\"Here are the results of the workflow:\n\n$(cat results.txt)\"}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls" | jq -r .html_url)
+
+        echo "Pull Request URL: $PR_URL"
 
     - name: Cleanup
       run: |
