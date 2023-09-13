@@ -20,30 +20,19 @@ jobs:
           name: results
           path: output
       
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: results
-          path: downloaded_results
-      
       - name: Attach results.txt to Pull Request
         uses: actions/upload-artifact@v2
         with:
           name: results
-          path: downloaded_results/results/results.txt
+          path: output/results.txt
       
-      - name: Comment with attachment
-        run: |
-          content=$(cat downloaded_results/results/results.txt)
-          echo "::set-output name=content::$content"
-        id: comment
-      
-      - name: Post PR Comment
+      - name: Post PR Comment with attachment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const outputContent = process.env.comment;
+            const fs = require('fs');
+            const content = fs.readFileSync('output/results.txt', 'utf8');
             const github = context.repo;
             const prNumber = context.issue.number;
-            github.issues.createComment({ issue_number: prNumber, owner: github.owner, repo: github.repo, body: outputContent });
+            github.issues.createComment({ issue_number: prNumber, owner: github.owner, repo: github.repo, body: content });
