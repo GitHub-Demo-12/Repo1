@@ -1,0 +1,23 @@
+name: Attach Results to Pull Request
+
+on:
+  workflow_dispatch:
+
+jobs:
+  attach-results:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Run your workflow or commands
+      run: |
+        # Replace this with the commands you want to execute.
+        echo "This is your workflow output" > output/results.txt
+
+    - name: Upload results to artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: results
+        path: output/results.txt
