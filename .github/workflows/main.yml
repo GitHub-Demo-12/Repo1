@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Set up Git
+      run: |
+        git config --global user.email "charanv@devtools.in"
+        git config --global user.name "Charan-SV"
+
     - name: Check out code
       uses: actions/checkout@v2
 
@@ -26,7 +31,7 @@ jobs:
 
         # Create a pull request
         PR_URL=$(curl -s -X POST \
-          -H "Authorization: token ${{ secrets.TOKEN }}" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -d "{\"title\":\"Results\",\"base\":\"main\",\"head\":\"temp-branch\",\"body\":\"Here are the results of the workflow:\n\n$(cat results.txt)\"}" \
           "https://api.github.com/repos/${{ github.repository }}/pulls" | jq -r .html_url)
 
