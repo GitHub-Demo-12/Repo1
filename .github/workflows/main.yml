@@ -11,16 +11,26 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Create the output directory
-      run: mkdir -p $GITHUB_WORKSPACE/output
-
     - name: Run your workflow or commands
       run: |
         # Replace this with the commands you want to execute.
-        echo "This is your workflow output" > $GITHUB_WORKSPACE/output/results.txt
+        echo "This is your workflow output" > results.txt
 
-    - name: Upload results to artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: results
-        path: $GITHUB_WORKSPACE/output/results.txt
+    - name: Attach results to pull request
+      run: |
+        # Install and configure GitHub CLI (gh)
+        brew install gh
+
+        # Create a temporary branch to commit the results
+        git checkout -b temp-branch
+        git add results.txt
+        git commit -m "Add results.txt"
+        git push origin temp-branch
+
+        # Create a pull request
+        gh pr create --base main --head temp-branch --title "Results" --body "Here are the results of the workflow:" --reviewer Charan-SV
+
+    - name: Cleanup
+      run: |
+        # Delete the temporary branch
+        git push origin --delete temp-branch
