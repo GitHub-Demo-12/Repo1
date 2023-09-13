@@ -14,11 +14,11 @@ jobs:
     - name: Run your workflow or commands
       run: |
         # Replace this with the commands you want to execute.
-        mkdir -p output
-        echo "This is your workflow output" > output/results.txt
+        mkdir -p $WORKSPACE/output
+        echo "This is your workflow output" > $WORKSPACE/output/results.txt
 
     - name: Upload results to artifacts
       uses: actions/upload-artifact@v2
       with:
         name: results
-        path: ./output
+        path: $WORKSPACE/output/results.txt
