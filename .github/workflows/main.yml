@@ -33,6 +33,6 @@ jobs:
           script: |
             const fs = require('fs');
             const content = fs.readFileSync('output/results.txt', 'utf8');
-            const github = context.repo;
+            const myGitHub = context.repo; // Rename 'github' to 'myGitHub' or any other unique name
             const prNumber = context.issue.number;
-            github.issues.createComment({ issue_number: prNumber, owner: github.owner, repo: github.repo, body: content });
+            myGitHub.issues.createComment({ issue_number: prNumber, owner: myGitHub.owner, repo: myGitHub.repo, body: content });
