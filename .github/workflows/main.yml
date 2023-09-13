@@ -18,21 +18,27 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: results
-          path: output
+          path: output/
       
-      - name: Attach results.txt to Pull Request
-        uses: actions/upload-artifact@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          name: results
-          path: output/results.txt
+          python-version: 3.x
       
-      - name: Post PR Comment with attachment
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const content = fs.readFileSync('output/results.txt', 'utf8');
-            const myGitHub = context.repo; // Rename 'github' to 'myGitHub' or any other unique name
-            const prNumber = context.issue.number;
-            myGitHub.issues.createComment({ issue_number: prNumber, owner: myGitHub.owner, repo: myGitHub.repo, body: content });
+      - name: Install requests library
+        run: pip install requests
+      
+      - name: Create GitHub Personal Access Token
+        id: create-token
+        run: echo "::set-output name=token::$(curl -X POST -u ${{ secrets.GITHUB_USERNAME }}:${{ secrets.GITHUB_TOKEN }} https://api.github.com/authorizations -d '{"scopes":["repo"], "note":"PR Comment Upload"}' | jq -r '.token')"
+      
+      - name: Upload results.txt as a comment
+        run: |
+          COMMENT="results.txt attachment"
+          FILENAME="output/results.txt"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          TOKEN="${{ steps.create-token.outputs.token }}"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments"
+          UPLOAD_URL=$(curl -X POST -H "Authorization: token $TOKEN" "$API_URL" -d '{"body":"'"$COMMENT"'"}' | jq -r '.url')
+          curl -X POST -H "Authorization: token $TOKEN" -H "Content-Type: $(file -b --mime-type "$FILENAME")" --data-binary @"$FILENAME" "$UPLOAD_URL"
+    
