@@ -1,31 +1,49 @@
-name: example
-on:
-  pull_request:
-    types:
-      - opened
+name: Attach results.txt to Pull Request
+on: pull_request
 jobs:
-  example:
-    name: example
+  attach-results:
+    name: Attach results.txt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - run: mkdir -p output/
-      - run: echo "This is fancy a comment" > output/results.txt
-      - uses: actions/upload-artifact@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Create output directory
+        run: mkdir -p output/
+      
+      - name: Generate results.txt
+        run: echo "This is a fancy comment" > output/results.txt
+      
+      - name: Upload results.txt as an artifact
+        uses: actions/upload-artifact@v2
         with:
           name: results
           path: output
-      - uses: actions/download-artifact@v1
+      
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
           name: results
-      - name: Add comment to PR
+          path: downloaded_results
+      
+      - name: Attach results.txt to Pull Request
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: downloaded_results/results/results.txt
+      
+      - name: Comment with attachment
         run: |
-          # Read the contents of the results.txt file
-          COMMENT_CONTENT=$(cat ${{ github.workspace }}/results/results.txt)
-
-          # Create a comment on the pull request using GitHub API
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            -d '{"body": "Here are the results:\n\n```plaintext\n'"$COMMENT_CONTENT"'\n```"}'
+          content=$(cat downloaded_results/results/results.txt)
+          echo "::set-output name=content::$content"
+        id: comment
+      
+      - name: Post PR Comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const outputContent = process.env.comment;
+            const github = context.repo;
+            const prNumber = context.issue.number;
+            github.issues.createComment({ issue_number: prNumber, owner: github.owner, repo: github.repo, body: outputContent });
