@@ -14,11 +14,11 @@ jobs:
     - name: Run your workflow or commands
       run: |
         # Replace this with the commands you want to execute.
-        mkdir -p $GITHUB_WORKSPACE/output
-        echo "This is your workflow output" > $GITHUB_WORKSPACE/output/results.txt
+        mkdir -p output
+        echo "This is your workflow output" > output/results.txt
 
     - name: Upload results to artifacts
       uses: actions/upload-artifact@v2
       with:
         name: results
-        path: $GITHUB_WORKSPACE/output
+        path: ./output
