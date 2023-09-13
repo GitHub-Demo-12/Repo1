@@ -1,0 +1,31 @@
+name: example
+on:
+  pull_request:
+    types:
+      - opened
+jobs:
+  example:
+    name: example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: mkdir -p output/
+      - run: echo "This is fancy a comment" > output/results.txt
+      - uses: actions/upload-artifact@v1
+        with:
+          name: results
+          path: output
+      - uses: actions/download-artifact@v1
+        with:
+          name: results
+      - name: Add comment to PR
+        run: |
+          # Read the contents of the results.txt file
+          COMMENT_CONTENT=$(cat ${{ github.workspace }}/results/results.txt)
+
+          # Create a comment on the pull request using GitHub API
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            -d '{"body": "Here are the results:\n\n```plaintext\n'"$COMMENT_CONTENT"'\n```"}'
